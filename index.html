@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog</title>
+</head>
+<body>
+    <h1>Nandish's Blog</h1>
+    <h2><a href="#" id="blog-link">Blog</a> | <a href="#" id="create-blog-link">Create Blog</a></h2>
+    <div id="blog"></div>
+    <div id="blog-post"></div>
+    <div id="create-blog">
+        <div id="create-blog-form">
+            <button id="logout-button">Logout</button>
+            <h2>Create Post</h2>
+            <p><b></b></p>
+            <form id="form1">
+                Title:
+                <input type="text" id="title">
+                Body:
+                <textarea id="body"></textarea>
+                Publish:
+                <input type="checkbox" id="publish" checked>
+                <button>Submit</button>
+            </form>
+            <h2><a href="#" id="published-posts-link">Published Posts</a> | <a href="#" id="unpublished-posts-link">Unpublished Posts</a></h2>
+            <div id="published-posts"></div>
+            <div id="published-blog-posts"></div>
+            <div id="unpublished-posts"></div>
+            <div id="unpublished-blog-posts"></div>
+        </div>
+        <div id="create-blog-login-form">
+            <h2>Login</h2>
+            <form id="login_form">
+                Username:
+                <input type="text" id="username">
+                Password:
+                <input type="password" id="password">
+                <button>Login</button>
+            </form>
+        </div>
+        <br>
+    </div>
+    <script>
+        document.querySelector('#create-blog').style.display = 'none';
+        function fetchPosts(user = undefined, div_id = '#blog', blog_post_div_id = '#blog-post', path = '') {
+            fetch(`http://localhost:3000/${path}`, {method: 'GET'})
+            .then(res => res.json())
+            .then(posts => {
+                posts.forEach(post => {
+                    const div = document.querySelector(div_id);
+                    const div_content = document.createElement('div');
+                    div_content.append(document.createElement('hr'));
+                    div_content.append(document.createElement('p').textContent = 'Title: ' + post.title);
+                    div_content.append(document.createElement('br'));
+                    div_content.append(document.createElement('p').textContent = 'Date: ' + post.date);
+                    const button = document.createElement('button');
+                    button.innerHTML = 'Open';
+                    button.className = post.id;
+                    div_content.append(document.createElement('br'));
+                    div_content.append(document.createElement('br'));
+                    div_content.appendChild(button);
+                    if(user) {
+                        const delete_button = document.createElement('button');
+                        delete_button.textContent = 'Delete';
+                        div_content.appendChild(delete_button);
+                        delete_button.onclick = () => {
+                            fetch('http://localhost:3000/deletePost/'+post.id, {
+                                headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
+                            })
+                            .then(res => res.json())
+                            .then(data => {
+                                if(data.message == 'Success') div_content.remove();
+                            });
+                        }
+                        const unpublish_button = document.createElement('button');
+                        if(path) unpublish_button.textContent = 'Publish';
+                        else unpublish_button.textContent = 'Unpublish';
+                        div_content.appendChild(unpublish_button);
+                        unpublish_button.onclick = () => {
+                            fetch('http://localhost:3000/changeStatus/'+post.id, {
+                                headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
+                            })
+                            .then(res => res.json())
+                            .then(data => {
+                                if(data.message == 'Success') div_content.remove();
+                            });
+                        }
+                    }
+                    div_content.append(document.createElement('hr'));
+                    div.append(div_content);
+                    button.addEventListener('click', () => {
+                        window.scrollTo(0, 0);
+                        document.querySelector(div_id).style.display = 'none';
+                        const blog_post_div = document.querySelector(blog_post_div_id);
+                        blog_post_div.textContent = '';
+                        blog_post_div.style.display = 'block';
+                        const h2 = document.createElement('h2');
+                        h2.textContent = post.title;
+                        const p = document.createElement('p');
+                        p.textContent = post.body;
+                        const h2_comments = document.createElement('h2');
+                        h2_comments.textContent = 'Comments: ';
+                        const form = document.createElement('form');
+                        const input_username = document.createElement('input');
+                        input_username.type = 'text';
+                        input_username.id = 'name';
+                        const input_text = document.createElement('input');
+                        input_text.type = 'text';
+                        input_text.id = 'text';
+                        const button_comment = document.createElement('button');
+                        button_comment.textContent = 'Submit';
+                        const form_p = document.createElement('p');
+                        const form_b = document.createElement('b');
+                        form_p.append(form_b);
+                        form.append(form_p, document.createElement('p').textContent = 'Username: ', input_username, document.createElement('br'),document.createElement('br'), document.createElement('p').textContent = 'Comment: ', input_text, document.createElement('br'),document.createElement('br'), button_comment);
+                        const div_parent_comment = document.createElement('div');
+                        function prependComment(comment) {
+                            const div_comment = document.createElement('div'); 
+                            if(user) {
+                                const delete_comment_button = document.createElement('button');
+                                delete_comment_button.textContent = 'Delete';
+                                div_comment.prepend(document.createElement('hr'), document.createElement('p').textContent = 'Username: ' + comment.name, document.createElement('br'), document.createElement('p').textContent = 'Comment: ' + comment.text, document.createElement('br'), document.createElement('p').textContent = 'Date: ' + comment.date, document.createElement('br'), delete_comment_button, document.createElement('hr'));
+                                delete_comment_button.onclick = () => {
+                                    fetch('http://localhost:3000/deleteComment/'+comment.id, {
+                                        headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
+                                    })
+                                    .then(res => res.json())
+                                    .then(data => {
+                                        if(data.message == 'Success') div_comment.remove();
+                                    })
+
+                                }
+                            } else div_comment.prepend(document.createElement('hr'), document.createElement('p').textContent = 'Username: ' + comment.name, document.createElement('br'), document.createElement('p').textContent = 'Comment: ' + comment.text, document.createElement('br'), document.createElement('p').textContent = 'Date: ' + comment.date, document.createElement('br'), document.createElement('hr'));
+                            div_parent_comment.append(div_comment);
+                        }
+                        post.comments.forEach(comment => prependComment(comment));
+                        blog_post_div.append(h2, p, h2_comments, form, div_parent_comment);
+                        form.addEventListener('submit', e => {
+                            const comment_data = {
+                                name: input_username.value,
+                                text: input_text.value,
+                                postId: post.id,
+                                date: Date()
+                            }
+                            fetch('http://localhost:3000/createComment', {
+                                method: 'POST',
+                                headers: {'Content-Type': 'application/json'},
+                                body: JSON.stringify(comment_data)
+                            })
+                            .then(res => res.json())
+                            .then(data => {
+                                if(data['message'].includes('Error')) form_b.style.color = 'red';
+                                else {
+                                    form_b.style.color = 'green';
+                                    input_username.value = '';
+                                    input_text.value = '';
+                                    prependComment(comment_data);
+                                }
+                                form_b.textContent = data['message'];
+                            });
+                            e.preventDefault();
+                        });
+                    });
+                });
+            });
+        }
+        fetchPosts();
+        document.querySelector('#form1').onsubmit = () => {
+            if(localStorage.getItem('token')) {
+                const data = {
+                    title: document.querySelector('#title').value,
+                    body: document.querySelector('#body').value,
+                    publish: document.querySelector('#publish').checked
+                }
+                fetch('http://localhost:3000/createPost', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('token')},
+                    body: JSON.stringify(data)
+                })
+                .then(res => res.json())
+                .then(data => {
+                    const b = document.querySelector('b');
+                    if(data['message'].includes('Success')) b.style.color = 'green';
+                    else b.style.color = 'red';
+                    b.textContent = data['message'];
+                });
+                document.querySelector('#title').value = '';
+                document.querySelector('#body').value = '';
+                return false;
+            } else {
+                document.querySelector('b').textContent = 'Not authorized!';
+                document.querySelector('b').style.color = 'red';
+            }
+        }
+        document.querySelector('#blog-link').addEventListener('click', () => {
+            document.querySelector('#create-blog').style.display = 'none';
+            document.querySelector('#blog-post').style.display = 'none';
+            const blog_div = document.querySelector('#blog');
+            blog_div.textContent = '';
+            blog_div.style.display = 'block';
+            fetchPosts();
+        });
+        document.querySelector('#create-blog-link').addEventListener('click', () => {
+            document.querySelector('#blog').style.display = 'none';
+            document.querySelector('#blog-post').style.display = 'none';
+            document.querySelector('#create-blog').style.display = 'block';
+            document.querySelector('#create-blog-form').style.display = 'none';
+            if(localStorage.getItem('token')) {
+                fetch('http://localhost:3000/verifyToken', {
+                    method: 'GET',
+                    headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if(data.message == 'Success') {
+                        document.querySelector('#create-blog-form').style.display = 'block';
+                        document.querySelector('#create-blog-login-form').style.display = 'none';
+                    } else {
+                        document.querySelector('#create-blog-form').style.display = 'none';
+                        document.querySelector('#create-blog-login-form').style.display = 'block';
+                    }
+                });
+            } else {
+                document.querySelector('#create-blog-form').style.display = 'none';
+                document.querySelector('#create-blog-login-form').style.display = 'block';
+            }
+        });
+        const login_p = document.createElement('p');
+        const login_b = document.createElement('b');
+        login_p.append(login_b);
+        document.querySelector('#login_form').prepend(login_p);
+        document.querySelector('#login_form').onsubmit = () => {
+            const login_data = {
+                username: document.querySelector('#username').value,
+                password: document.querySelector('#password').value
+            }
+            fetch('http://localhost:3000/login', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(login_data)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.error) {
+                    login_b.textContent = data.error;
+                    login_b.style.color = 'red';
+                }     
+                else {
+                    localStorage.setItem('token', data.token);
+                    document.querySelector('#username').value = '';
+                    document.querySelector('#password').value = '';
+                    document.querySelector('#create-blog-form').style.display = 'block';
+                    document.querySelector('#create-blog-login-form').style.display = 'none';
+                }
+            });
+            return false;
+        }
+        document.querySelector('#logout-button').onclick = () => {
+            if(localStorage.getItem('token')) {
+                localStorage.removeItem('token');
+                document.querySelector('#create-blog-form').style.display = 'none';
+                document.querySelector('#create-blog-login-form').style.display = 'block';
+            } 
+        };
+        document.querySelector('#published-posts-link').onclick = () => {
+            document.querySelector('#unpublished-blog-posts').style.display = 'none';
+            document.querySelector('#unpublished-posts').style.display = 'none';
+            document.querySelector('#published-blog-posts').style.display = 'none';
+            document.querySelector('#published-posts').style.display = 'block';
+            document.querySelector('#published-posts').textContent = '';
+            fetchPosts('Nandish', '#published-posts', '#published-blog-posts');
+        }
+        document.querySelector('#unpublished-posts-link').onclick = () => {
+            document.querySelector('#published-blog-posts').style.display = 'none';
+            document.querySelector('#published-posts').style.display = 'none';
+            document.querySelector('#unpublished-blog-posts').style.display = 'none';
+            document.querySelector('#unpublished-posts').style.display = 'block';
+            document.querySelector('#unpublished-posts').textContent = '';
+            fetchPosts('Nandish', '#unpublished-posts', '#unpublished-blog-posts', 'unpublishedPosts')
+        }
+    </script>
+</body>
+</html>
