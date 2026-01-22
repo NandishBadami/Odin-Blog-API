@@ -45,7 +45,7 @@
     <script>
         document.querySelector('#create-blog').style.display = 'none';
         function fetchPosts(user = undefined, div_id = '#blog', blog_post_div_id = '#blog-post', path = '') {
-            fetch(`http://localhost:3000/${path}`, {method: 'GET'})
+            fetch(`https://blog-api-5fux.onrender.com/${path}`, {method: 'GET'})
             .then(res => res.json())
             .then(posts => {
                 posts.forEach(post => {
@@ -66,7 +66,7 @@
                         delete_button.textContent = 'Delete';
                         div_content.appendChild(delete_button);
                         delete_button.onclick = () => {
-                            fetch('http://localhost:3000/deletePost/'+post.id, {
+                            fetch('https://blog-api-5fux.onrender.com/deletePost/'+post.id, {
                                 headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
                             })
                             .then(res => res.json())
@@ -79,7 +79,7 @@
                         else unpublish_button.textContent = 'Unpublish';
                         div_content.appendChild(unpublish_button);
                         unpublish_button.onclick = () => {
-                            fetch('http://localhost:3000/changeStatus/'+post.id, {
+                            fetch('https://blog-api-5fux.onrender.com/changeStatus/'+post.id, {
                                 headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
                             })
                             .then(res => res.json())
@@ -123,7 +123,7 @@
                                 delete_comment_button.textContent = 'Delete';
                                 div_comment.prepend(document.createElement('hr'), document.createElement('p').textContent = 'Username: ' + comment.name, document.createElement('br'), document.createElement('p').textContent = 'Comment: ' + comment.text, document.createElement('br'), document.createElement('p').textContent = 'Date: ' + comment.date, document.createElement('br'), delete_comment_button, document.createElement('hr'));
                                 delete_comment_button.onclick = () => {
-                                    fetch('http://localhost:3000/deleteComment/'+comment.id, {
+                                    fetch('https://blog-api-5fux.onrender.com/deleteComment/'+comment.id, {
                                         headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
                                     })
                                     .then(res => res.json())
@@ -144,7 +144,7 @@
                                 postId: post.id,
                                 date: Date()
                             }
-                            fetch('http://localhost:3000/createComment', {
+                            fetch('https://blog-api-5fux.onrender.com/createComment', {
                                 method: 'POST',
                                 headers: {'Content-Type': 'application/json'},
                                 body: JSON.stringify(comment_data)
@@ -174,7 +174,7 @@
                     body: document.querySelector('#body').value,
                     publish: document.querySelector('#publish').checked
                 }
-                fetch('http://localhost:3000/createPost', {
+                fetch('https://blog-api-5fux.onrender.com/createPost', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('token')},
                     body: JSON.stringify(data)
@@ -208,7 +208,7 @@
             document.querySelector('#create-blog').style.display = 'block';
             document.querySelector('#create-blog-form').style.display = 'none';
             if(localStorage.getItem('token')) {
-                fetch('http://localhost:3000/verifyToken', {
+                fetch('https://blog-api-5fux.onrender.com/verifyToken', {
                     method: 'GET',
                     headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
                 })
@@ -236,7 +236,7 @@
                 username: document.querySelector('#username').value,
                 password: document.querySelector('#password').value
             }
-            fetch('http://localhost:3000/login', {
+            fetch('https://blog-api-5fux.onrender.com/login', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(login_data)
