@@ -23,7 +23,7 @@ async function createPost(req, res) {
                 data: {
                     title: req.body.title,
                     body: req.body.body,
-                    userId: 5,
+                    userId: 1,
                     date: Date(),
                     published: req.body.publish
                 }
@@ -78,17 +78,17 @@ function tokenVerification(req) {
 }
 
 async function unpublishedPosts(req, res) {
-        res.json(await prisma.post.findMany({
-            where: {
-                published: false
-            },
-            include: {
-                comments: true
-            },
-            orderBy: {
-                id: 'desc'
-            }
-        }));
+    res.json(await prisma.post.findMany({
+        where: {
+            published: false
+        },
+        include: {
+            comments: true
+        },
+        orderBy: {
+            id: 'desc'
+        }
+    }));
 }
 
 async function changeStatus(req, res) {

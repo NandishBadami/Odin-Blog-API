@@ -1,7 +1,12 @@
 const { prisma } = require('./lib/prisma');
 
 async function main() {
-    const all_users = await prisma.post.deleteMany();
+    const all_users = await prisma.user.create({
+        data: {
+            username: 'Nandish',
+            password: '1234'
+        }
+    });
     console.log(all_users);
 }
 
